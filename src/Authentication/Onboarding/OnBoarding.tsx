@@ -1,12 +1,13 @@
 import React, { useRef } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
-import Animated, { multiply } from "react-native-reanimated";
+import Animated, { multiply, divide } from "react-native-reanimated";
 import { useScrollHandler, interpolateColor } from "react-native-redash";
-import Slide, { SLIDE_HEIGHT } from "./Slider";
+import Slide, { SLIDE_HEIGHT, BORDER_RADIUS } from "./Slider";
 import SubSlide from "./SubSlide";
+import Dot from "./Dot";
 
 const { width } = Dimensions.get("window");
-const BORDER_RADIUS = 75;
+
 const slides = [
   {
     title: "Relaxed",
@@ -14,6 +15,7 @@ const slides = [
     subtitle: "Find Your Outfits",
     description:
       "Confused about your outfit? Don't worry! Finde the best outfit here",
+    picture: require("./assets/1.png"),
   },
   {
     title: "Playful",
@@ -21,6 +23,7 @@ const slides = [
     subtitle: "Hear it First, Wear it First",
     description:
       "Haiting the chlothes in your wardrobe? Explore hundres of outfit ideas",
+    picture: require("./assets/2.png"),
   },
   {
     title: "Excentric",
@@ -28,6 +31,7 @@ const slides = [
     subtitle: "Your Style, Your way",
     description:
       "Create your individual & unique style and look amazing everyday",
+    picture: require("./assets/3.png"),
   },
   {
     title: "Funky",
@@ -35,6 +39,7 @@ const slides = [
     subtitle: "Look Good, Feel Good",
     description:
       "Discover the lastest trends in fashion and explore your personality",
+    picture: require("./assets/4.png"),
   },
 ];
 const styles = StyleSheet.create({
@@ -51,9 +56,15 @@ const styles = StyleSheet.create({
   },
   footerContent: {
     flex: 1,
-    flexDirection: "row",
     backgroundColor: "white",
     borderTopLeftRadius: BORDER_RADIUS,
+  },
+  pagination: {
+    ...StyleSheet.absoluteFillObject,
+    height: BORDER_RADIUS,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 
@@ -78,8 +89,8 @@ const OnBoarding = () => {
           bounces={false}
           {...scrollHandler}
         >
-          {slides.map(({ title }, index) => (
-            <Slide key={index} right={!!(index % 2)} {...{ title }} />
+          {slides.map(({ title, picture }, index) => (
+            <Slide key={index} right={!!(index % 2)} {...{ title, picture }} />
           ))}
         </Animated.ScrollView>
       </Animated.View>
@@ -91,31 +102,36 @@ const OnBoarding = () => {
             backgroundColor,
           }}
         />
-        <Animated.View
-          style={[
-            styles.footerContent,
-            {
-              width: width * slides.length,
+        <View style={styles.footerContent}>
+          <View style={styles.pagination}>
+            {slides.map((_, index) => (
+              <Dot key={index} currentIndex={divide(x, width)} {...{ index }} />
+            ))}
+          </View>
+          <Animated.View
+            style={{
               flex: 1,
+              flexDirection: "row",
+              width: width * slides.length,
               transform: [{ translateX: multiply(x, -1) }],
-            },
-          ]}
-        >
-          {slides.map(({ subtitle, description }, index) => (
-            <SubSlide
-              key={index}
-              last={index === slides.length - 1}
-              {...{ subtitle, description, x }}
-              onPress={() => {
-                if (scroll.current) {
-                  scroll.current
-                    .getNode()
-                    .scrollTo({ x: width * (index + 1), animated: true });
-                }
-              }}
-            />
-          ))}
-        </Animated.View>
+            }}
+          >
+            {slides.map(({ subtitle, description }, index) => (
+              <SubSlide
+                key={index}
+                last={index === slides.length - 1}
+                {...{ subtitle, description, x }}
+                onPress={() => {
+                  if (scroll.current) {
+                    scroll.current
+                      .getNode()
+                      .scrollTo({ x: width * (index + 1), animated: true });
+                  }
+                }}
+              />
+            ))}
+          </Animated.View>
+        </View>
       </View>
     </View>
   );
